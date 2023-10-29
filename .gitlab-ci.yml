@@ -1,0 +1,31 @@
+stages:
+  - deploy
+
+deploy:
+  stage: deploy
+  script:
+    # Install Node.js and PM2 if not already installed
+    - curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash -
+    - sudo apt-get install -y nodejs
+    - sudo npm install -g pm2
+
+    # Copy the .env file to your project directory
+    - cp /srv/config/.env .env
+
+    # Pull the latest changes from the Git repository
+    - git pull origin main
+
+    # Install project dependencies
+    - npm install --production
+
+    # Migrate the database (Prisma)
+    - npx prisma migrate deploy
+
+    # Build your application (if needed)
+    - npm run build
+
+    # Start your application using PM2
+    - pm2 start your-app.js --name "your-app"
+
+  only:
+    - main
