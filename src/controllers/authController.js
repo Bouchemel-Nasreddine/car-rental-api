@@ -231,7 +231,7 @@ const verifyPhone = async (req, res) => {
             country: 'UY'
         },
         headers: {
-            'X-RapidAPI-Key': 'e48ed22dfdmsh6cc8cebf6a082c8p19e207jsn7f18d9072c16',
+            'X-RapidAPI-Key': process.env.VERIFY_PHONE_API_KEY,
             'X-RapidAPI-Host': 'phonenumbervalidatefree.p.rapidapi.com'
         }
     };
