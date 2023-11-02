@@ -1,6 +1,7 @@
 
+const { getTokenFromHeaders, verifyToken, getUpdatedToken } = require('../utils/tokenUtils');
+
 const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
 const PrismaClient = require('@prisma/client').PrismaClient;
 const { validationResult } = require('express-validator');
 const axios = require('axios');
@@ -187,31 +188,25 @@ const login = async (req, res) => {
         return res.status(422).json({ message: errors });
     }
 
-    console.log("req.body: ", req.body);
-
     const { email, password } = req.body;
 
     try {
-        const user = await prisma.Credential.findUnique({
+        const cred = await prisma.Credential.findUnique({
             where: {
                 email
             }
         });
 
-        if (!user) {
+        if (!cred) {
             return res.status(400).json({ message: 'user with this email does not exist' });
         } else {
-            const isPasswordValid = await bcrypt.compare(password, user.password);
+            const isPasswordValid = await bcrypt.compare(password, cred.password);
             if (!isPasswordValid) {
                 return res.status(400).json({ message: 'Invalid password' });
             } else {
-                token = jwt.sign(
-                    { userId: user.id },
-                    process.env.JWT_SECRET,
-                    { expiresIn: '1h' }
-                );
+                token = await getUpdatedToken(cred);
 
-                return res.status(200).json({ token, userId: user.id });
+                return res.status(200).json({ token });
             }
         }
     } catch (error) {
