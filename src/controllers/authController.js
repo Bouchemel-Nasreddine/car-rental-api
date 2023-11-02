@@ -3,10 +3,11 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const PrismaClient = require('@prisma/client').PrismaClient;
 const { validationResult } = require('express-validator');
-const { Console } = require('console');
-
+const axios = require('axios');
 
 const prisma = new PrismaClient();
+
+const sentSMSCodes = {};
 
 const register = async (req, res) => {
 
@@ -32,7 +33,13 @@ const register = async (req, res) => {
             }
         });
 
-        if (user) {
+        const credentials = await prisma.Credential.findUnique({
+            where: {
+                email
+            }
+        });
+
+        if (credentials || user) {
             return res.status(400).json({ message: 'Email already exists' });
         }
     } catch (error) {
@@ -110,6 +117,21 @@ const register = async (req, res) => {
     //hashing the password
     const hashedPassword = await bcrypt.hash(password, parseInt(process.env.SALT_ROUNDS));
 
+    //creating credentials
+    let credentials;
+    try {
+        credentials = await prisma.Credential.create({
+            data: {
+                email,
+                password: hashedPassword
+            }
+        });
+        console.log("credentials: ", credentials);
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: 'Something went wrong, please try again later or try contact assitance service ' });
+    }
+
     //creating the user
     try {
         const user = await prisma.user.create({
@@ -119,13 +141,31 @@ const register = async (req, res) => {
                 email,
                 phone: parseInt(phone),
                 countryCode: parseInt(country_code),
-                password: hashedPassword,
                 adress: adress.id,
                 licenseId: license.id,
-                avatar: avatar
+                avatar: avatar,
+                Credential: {
+                    connect: {
+                        id: credentials.id
+                    }
+                }
 
             }
         });
+
+        //now coonecting the credentials with the user
+        // await prisma.user.update({
+        //     where: {
+        //         id: user.id
+        //     },
+        //     data: {
+        //         credentialId: {
+        //             connect: {
+        //                 id: credentials.id
+        //             }
+        //         }
+        //     }
+        // });
 
         console.log("user", user);
 
@@ -181,7 +221,31 @@ const login = async (req, res) => {
 
 }
 
+const verifyPhone = async (req, res) => {
+
+    const options = {
+        method: 'GET',
+        url: 'https://phonenumbervalidatefree.p.rapidapi.com/ts_PhoneNumberValidateTest.jsp',
+        params: {
+            number: '+59894887799',
+            country: 'UY'
+        },
+        headers: {
+            'X-RapidAPI-Key': 'e48ed22dfdmsh6cc8cebf6a082c8p19e207jsn7f18d9072c16',
+            'X-RapidAPI-Host': 'phonenumbervalidatefree.p.rapidapi.com'
+        }
+    };
+
+    try {
+        const response = await axios.request(options);
+        console.log(response.data);
+    } catch (error) {
+        console.error(error);
+    }
+}
+
 module.exports = {
     register,
-    login
+    login,
+    verifyPhone
 }
