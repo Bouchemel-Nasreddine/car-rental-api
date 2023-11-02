@@ -1,17 +1,25 @@
-echo "Kill all the running PM2 actions"
+echo "=============Kill all the running PM2 actions============="
 sudo pm2 kill
 
-echo "Jump to app folder"
+echo "=============Jump to app folder==========================="
 cd /srv/car-rental-api
 
-echo "Update app from Git"
+echo "=============Update app from Git=========================="
 git pull
 
-echo "Install app dependencies"
-sudo npm ci
+echo "=============node version================================="
+node -v
 
-echo "Build your app"
-sudo npm run build
+echo "=============Install nodemon=============================="
+npm install nodemon -g
 
-echo "Run new PM2 action"
-sudo pm2 start car-rental-api
+echo "=============Install app dependencies====================="
+npm ci
+
+echo "=============Jump to parent folder========================"
+cd ..
+
+echo "=============Run new PM2 action==========================="
+pm2 start car-rental-api
+
+
