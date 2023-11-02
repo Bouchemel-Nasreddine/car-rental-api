@@ -154,23 +154,7 @@ const register = async (req, res) => {
             }
         });
 
-        //now coonecting the credentials with the user
-        // await prisma.user.update({
-        //     where: {
-        //         id: user.id
-        //     },
-        //     data: {
-        //         credentialId: {
-        //             connect: {
-        //                 id: credentials.id
-        //             }
-        //         }
-        //     }
-        // });
-
-        console.log("user", user);
-
-        res.status(201).json({ message: 'User created successfully' });
+        res.status(201).json({ "id": user.id, message: 'User created successfully' });
     } catch (error) {
         console.log(error);
         res.status(500).json({ message: 'Something went wrong, please try again later or try contact assitance service ' });
@@ -206,7 +190,23 @@ const login = async (req, res) => {
             } else {
                 token = await getUpdatedToken(cred);
 
-                return res.status(200).json({ token });
+                const credId = parseInt(cred.id);
+
+                try {
+                    const user = await prisma.User.findUnique({
+                        where: {
+                            credentialId:
+                                credId
+
+                        }
+                    });
+
+                    return res.status(200).json({ "id": user.id, token });
+                } catch (error) {
+                    console.log(error);
+                    return res.status(500).json({ message: 'Something went wrong, please try again later or try contact assitance service ' });
+                }
+
             }
         }
     } catch (error) {
@@ -218,12 +218,41 @@ const login = async (req, res) => {
 
 const verifyPhone = async (req, res) => {
 
+    const result = validationResult(req);
+
+    if (!result.isEmpty()) {
+        let errors = [];
+        result.array().forEach(error => {
+            errors.push(error.msg);
+        });
+        return res.status(422).json({ message: errors });
+    }
+
+    const id = req.params.id;
+
+    //verifing if the user exists
+    try {
+        const user = await prisma.user.findUnique({
+            where: {
+                id: parseInt(id)
+            }
+        });
+
+        if (!user) {
+            return res.status(404).json({ message: 'User does not exist' });
+        }
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: 'Something went wrong, please try again later or try contact assitance service ' });
+    }
+
+    const { country_code, phone } = req.body;
+
     const options = {
         method: 'GET',
         url: 'https://phonenumbervalidatefree.p.rapidapi.com/ts_PhoneNumberValidateTest.jsp',
         params: {
-            number: '+59894887799',
-            country: 'UY'
+            number: country_code + phone,
         },
         headers: {
             'X-RapidAPI-Key': process.env.VERIFY_PHONE_API_KEY,
@@ -233,9 +262,27 @@ const verifyPhone = async (req, res) => {
 
     try {
         const response = await axios.request(options);
-        console.log(response.data);
+        if (response || response.isValidNumber) {
+
+            try {
+                await prisma.user.update({
+                    where: {
+                        id: parseInt(id)
+                    },
+                    data: {
+                        phoneVerified: true
+                    }
+                });
+
+                return res.status(200).json({ message: 'Phone number verified successfully' });
+            } catch (error) {
+                console.log(error);
+                return res.status(500).json({ message: 'Something went wrong, please try again later or try contact assitance service ' });
+            }
+        }
     } catch (error) {
         console.error(error);
+        return res.status(500).json({ message: 'Something went wrong, please try again later or try contact assitance service ' });
     }
 }
 

@@ -62,4 +62,12 @@ router.post('/login',
     ]
     , authController.login);
 
+router.post('/verify-phone/:id',
+    [
+        check('country_code', 'Country code is required').not().isEmpty(),
+        check('phone', 'Phone number is required').not().isEmpty(),
+        check('phone', 'phone length msut be 9 digits without the zero or the country code').isLength({ min: 9, max: 9 })
+    ]
+    , authController.verifyPhone);
+
 module.exports = router;
