@@ -18,6 +18,7 @@ npm ci
 
 echo "=============Jump to parent folder========================"
 cd ..
+pwd
 
 echo "=============Run new PM2 action==========================="
 pm2 start car-rental-api
