@@ -24,7 +24,7 @@ async function getUpdatedToken(cred) {
             id: cred.id,
             email: cred.email
         }, process.env.JWT_SECRET, {
-            expiresIn: '1m'
+            expiresIn: '1j'
         });
 
         await updateTokenInDatabase(newToken, cred.id);
@@ -35,11 +35,42 @@ async function getUpdatedToken(cred) {
     }
 }
 
+async function getUpdatedAdminToken(admin) {
+    if (admin.token === null || admin.token === "" || !verifyToken(admin.token)) {
+        const newToken = jwt.sign({
+            id: admin.id,
+        }, process.env.JWT_SECRET, {
+            expiresIn: '1j'
+        });
+
+        await updateAdminTokenInDatabase(newToken, admin.id);
+
+        return newToken;
+    } else {
+        return admin.token;
+    }
+}
+
 async function updateTokenInDatabase(newToken, credId) {
     try {
         await prisma.Credential.update({
             where: {
                 id: credId
+            },
+            data: {
+                token: newToken
+            }
+        });
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+async function updateAdminTokenInDatabase(newToken, adminId) {
+    try {
+        await prisma.Admin.update({
+            where: {
+                id: adminId
             },
             data: {
                 token: newToken
@@ -69,4 +100,4 @@ function getTokenFromHeaders(headers) {
 }
 
 
-module.exports = { verifyToken, getTokenFromHeaders, getUpdatedToken };
+module.exports = { verifyToken, getTokenFromHeaders, getUpdatedToken, getUpdatedAdminToken };

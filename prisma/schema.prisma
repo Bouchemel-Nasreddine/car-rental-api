@@ -70,7 +70,7 @@ model Document {
 }
 
 model Admin {
-  id        Int       @id
+  id        String    @id
   password  String
   token     String?
   createdAt DateTime  @default(now())

@@ -6,6 +6,7 @@ const app = express();
 const prisma = new PrismaClient();
 
 const authRoutes = require('./routes/auth');
+const adminRoutes = require('./routes/admin');
 
 app.use(express.json());
 
@@ -26,6 +27,8 @@ app.get('/', async (req, res) => {
 });
 
 app.use('/', authRoutes);
+
+app.use('/admin', adminRoutes);
 
 app.use((req, res, next) => {
     res.status(404).json({ message: 'Route not found' });

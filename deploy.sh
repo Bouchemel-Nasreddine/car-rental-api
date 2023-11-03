@@ -3,6 +3,7 @@ sudo pm2 kill
 
 echo "=============Jump to app folder==========================="
 cd /srv/car-rental-api
+pwd
 
 echo "=============Update app from Git=========================="
 git pull

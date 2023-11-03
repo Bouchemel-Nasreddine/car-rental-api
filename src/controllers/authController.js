@@ -1,5 +1,5 @@
 
-const { getTokenFromHeaders, verifyToken, getUpdatedToken } = require('../utils/tokenUtils');
+const { getUpdatedToken } = require('../utils/tokenUtils');
 
 const bcrypt = require('bcrypt');
 const PrismaClient = require('@prisma/client').PrismaClient;
@@ -44,7 +44,7 @@ const register = async (req, res) => {
         });
 
         if (credentials || user) {
-            return res.status(400).json({ message: 'Email already exists' });
+            return res.status(409).json({ message: 'Email already exists' });
         }
     } catch (error) {
         console.log(error);
@@ -63,7 +63,7 @@ const register = async (req, res) => {
         });
 
         if (user) {
-            return res.status(400).json({ message: 'Phone number already exists' });
+            return res.status(409).json({ message: 'Phone number already exists' });
         }
     } catch (error) {
         console.log(error);
@@ -244,7 +244,7 @@ const verifyPhone = async (req, res) => {
         if (!user) {
             return res.status(404).json({ message: 'User does not exist' });
         } else if (user.phoneVerified) {
-            return res.status(400).json({ message: 'Phone number already verified' });
+            return res.status(409).json({ message: 'Phone number already verified' });
         }
     } catch (error) {
         console.log(error);
@@ -318,7 +318,7 @@ const sendVerifyEmail = async (req, res) => {
         } else if (user.email !== email) {
             return res.status(400).json({ message: 'Email with id ' + id + ' does not match with the email provided' });
         } else if (user.emailVerified) {
-            return res.status(400).json({ message: 'Email already verified' });
+            return res.status(409).json({ message: 'Email already verified' });
         }
 
     } catch (error) {
