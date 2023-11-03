@@ -24,7 +24,7 @@ async function getUpdatedToken(cred) {
             id: cred.id,
             email: cred.email
         }, process.env.JWT_SECRET, {
-            expiresIn: '1j'
+            expiresIn: '1d'
         });
 
         await updateTokenInDatabase(newToken, cred.id);
@@ -40,7 +40,7 @@ async function getUpdatedAdminToken(admin) {
         const newToken = jwt.sign({
             id: admin.id,
         }, process.env.JWT_SECRET, {
-            expiresIn: '1j'
+            expiresIn: '1d'
         });
 
         await updateAdminTokenInDatabase(newToken, admin.id);
