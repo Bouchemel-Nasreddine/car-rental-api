@@ -16,6 +16,9 @@ npm install nodemon -g
 echo "=============Install app dependencies====================="
 npm ci
 
+echo "=============Run Prisma database migrations==============="
+npx prisma migrate deploy
+
 echo "=============Jump to parent folder========================"
 cd ..
 pwd
