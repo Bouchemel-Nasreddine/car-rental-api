@@ -243,6 +243,8 @@ const verifyPhone = async (req, res) => {
 
         if (!user) {
             return res.status(404).json({ message: 'User does not exist' });
+        } else if (user.phoneVerified) {
+            return res.status(400).json({ message: 'Phone number already verified' });
         }
     } catch (error) {
         console.log(error);
@@ -315,6 +317,8 @@ const sendVerifyEmail = async (req, res) => {
             return res.status(404).json({ message: 'User does not exist' });
         } else if (user.email !== email) {
             return res.status(400).json({ message: 'Email with id ' + id + ' does not match with the email provided' });
+        } else if (user.emailVerified) {
+            return res.status(400).json({ message: 'Email already verified' });
         }
 
     } catch (error) {
