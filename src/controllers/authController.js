@@ -5,10 +5,13 @@ const bcrypt = require('bcrypt');
 const PrismaClient = require('@prisma/client').PrismaClient;
 const { validationResult } = require('express-validator');
 const axios = require('axios');
+const sgMail = require('@sendgrid/mail');
+const crypto = require('crypto');
+const { response } = require('express');
 
 const prisma = new PrismaClient();
 
-const sentSMSCodes = {};
+const verificationTokens = [];
 
 const register = async (req, res) => {
 
@@ -286,8 +289,104 @@ const verifyPhone = async (req, res) => {
     }
 }
 
+const sendVerifyEmail = async (req, res) => {
+    const result = validationResult(req);
+
+    if (!result.isEmpty()) {
+        let errors = [];
+        result.array().forEach(error => {
+            errors.push(error.msg);
+        });
+        return res.status(422).json({ message: errors });
+    }
+
+    const id = req.params.id;
+    const { email } = req.body;
+
+    //verifing if the user exists
+    try {
+        const user = await prisma.user.findUnique({
+            where: {
+                id: parseInt(id)
+            }
+        });
+
+        if (!user) {
+            return res.status(404).json({ message: 'User does not exist' });
+        } else if (user.email !== email) {
+            return res.status(400).json({ message: 'Email with id ' + id + ' does not match with the email provided' });
+        }
+
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: 'Something went wrong, please try again later or try contact assitance service ' });
+    }
+
+
+    sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+
+    const token = crypto.randomBytes(32).toString('hex');
+
+    const verificationLink = process.env.SELF_URL + 'verify-email/' + token;
+
+    const msg = {
+        to: email,
+        from: process.env.SENDGRID_SENDER_EMAIL,
+        subject: 'Verify your email',
+        text: `Please click on the following link to verify your email: <a href="${verificationLink}">${verificationLink}</a>`,
+        html: `Please click on the following link to verify your email: <a href="${verificationLink}">${verificationLink}</a>`,
+    }
+
+    sgMail.send(msg)
+        .then((response) => {
+            console.log(response[0].statusCode);
+            console.log(response[0].headers);
+            verificationTokens.push({ email, token });
+            return res.status(200).json({ message: 'Email sent successfully' });
+        }
+        ).catch((error) => {
+            console.log(error);
+            return res.status(500).json({ message: 'Something went wrong, please try again later or try contact assitance service ' });
+        });
+
+}
+
+const verifyEmail = async (req, res) => {
+
+    const token = req.params.token;
+
+    const tokenIndex = verificationTokens.findIndex(t => t.token === token);
+
+    if (tokenIndex === -1) {
+        return res.status(404).json({ message: 'Url not found' });
+    }
+
+    const email = verificationTokens[tokenIndex].email;
+
+    try {
+        await prisma.user.update({
+            where: {
+                email
+            },
+            data: {
+                emailVerified: true
+            }
+        });
+
+        verificationTokens.splice(tokenIndex, 1);
+
+        return res.status(200).json({ message: 'Email verified successfully' });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: 'Something went wrong, please try again later or try contact assitance service ' });
+    }
+
+}
+
 module.exports = {
     register,
     login,
-    verifyPhone
+    verifyPhone,
+    sendVerifyEmail,
+    verifyEmail
 }

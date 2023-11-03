@@ -12,8 +12,10 @@
   "license": "ISC",
   "dependencies": {
     "@prisma/client": "^5.5.2",
+    "@sendgrid/mail": "^7.7.0",
     "axios": "^1.6.0",
     "bcrypt": "^5.1.1",
+    "crypto": "^1.0.1",
     "express": "^4.18.2",
     "express-validator": "^7.0.1",
     "fs": "^0.0.1-security",

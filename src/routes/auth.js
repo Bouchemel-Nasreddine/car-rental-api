@@ -70,4 +70,13 @@ router.post('/verify-phone/:id',
     ]
     , authController.verifyPhone);
 
+router.post('/send-email-verification/:id',
+    [
+        check('email', 'email is required').not().isEmpty(),
+        check('email', 'email must be a valid email').isEmail()
+    ]
+    , authController.sendVerifyEmail);
+
+router.get('/verify-email/:token', authController.verifyEmail);
+
 module.exports = router;
