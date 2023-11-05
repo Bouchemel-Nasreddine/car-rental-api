@@ -232,7 +232,7 @@ const verifyPhone = async (req, res) => {
     }
 
     const id = req.params.id;
-
+    const { country_code, phone } = req.body;
     //verifing if the user exists
     try {
         const user = await prisma.user.findUnique({
@@ -245,13 +245,13 @@ const verifyPhone = async (req, res) => {
             return res.status(404).json({ message: 'User does not exist' });
         } else if (user.phoneVerified) {
             return res.status(409).json({ message: 'Phone number already verified' });
+        } else if (user.countryCode !== parseInt(country_code) || user.phone !== parseInt(phone)) {
+            return res.status(400).json({ message: 'Phone number with id ' + id + ' does not match with the phone number provided' });
         }
     } catch (error) {
         console.log(error);
         return res.status(500).json({ message: 'Something went wrong, please try again later or try contact assitance service ' });
     }
-
-    const { country_code, phone } = req.body;
 
     const options = {
         method: 'GET',

@@ -25,4 +25,8 @@ router.post('/login-admin', [
 
 router.get('/verify-user/:user_id', adminController.verifyUserProfile);
 
+router.get('/get-all-users', adminController.getAllUsers);
+
+router.get('/get-all-unverified-users', adminController.getAllUnverifiedUsers);
+
 module.exports = router;
