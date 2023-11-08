@@ -3,7 +3,6 @@ const { verifyToken, getTokenFromHeaders, getUpdatedAdminToken } = require('../u
 
 const bcrypt = require('bcrypt');
 const { validationResult } = require('express-validator');
-const { parse } = require('path');
 const PrismaClient = require('@prisma/client').PrismaClient;
 
 const prisma = new PrismaClient();

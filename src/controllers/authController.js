@@ -70,6 +70,24 @@ const register = async (req, res) => {
         return res.status(500).json({ message: 'Something went wrong, please try again later or try contact assitance service ' });
     }
 
+    //verifing if the license number already exists
+    try {
+        const license = await prisma.document.findUnique({
+            where: {
+                Document_type_number_unique: {
+                    type: 'license',
+                    number: license_number
+                }
+            }
+        });
+        if (license) {
+            return res.status(409).json({ message: 'License number already exists' });
+        }
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: 'Something went wrong, please try again later or try contact assitance service ' });
+    }
+
     //creating the adress
     let adress;
     try {
