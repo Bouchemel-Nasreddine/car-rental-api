@@ -19,7 +19,9 @@ const sendEmail = async (email, subject, text) => {
         if (error.response) {
             console.error(error.response.body)
         }
+        return false
     }
+    return true;
 }
 
 module.exports = {

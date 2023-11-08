@@ -13,6 +13,8 @@ app.use('/uploads/images', express.static(path.join('uploads', 'images')));
 
 app.use('/uploads/files', express.static(path.join('uploads', 'files')));
 
+app.set('views', path.join(__dirname, 'views'));
+
 app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');

@@ -79,4 +79,18 @@ router.post('/send-email-verification/:id',
 
 router.get('/verify-email/:token', authController.verifyEmail);
 
+router.post('/forgot-password',
+    [
+        check('email', 'email is required').not().isEmpty(),
+        check('email', 'email must be a valid email').isEmail()
+    ]
+    , authController.forgotPassword);
+
+router.get('/reset-password-form/:token', (req, res) => {
+    const token = req.params.token;
+    res.render('reset-password-form', { token });
+});
+
+router.post('/reset-password', authController.resetPassword);
+
 module.exports = router;

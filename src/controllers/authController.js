@@ -1,5 +1,6 @@
 
 const { getUpdatedToken } = require('../utils/tokenUtils');
+const { sendEmail } = require('../utils/emailUtils');
 
 const bcrypt = require('bcrypt');
 const PrismaClient = require('@prisma/client').PrismaClient;
@@ -7,7 +8,6 @@ const { validationResult } = require('express-validator');
 const axios = require('axios');
 const sgMail = require('@sendgrid/mail');
 const crypto = require('crypto');
-const { response } = require('express');
 
 const prisma = new PrismaClient();
 
@@ -405,10 +405,95 @@ const verifyEmail = async (req, res) => {
 
 }
 
+const forgotPassword = async (req, res) => {
+
+    const result = validationResult(req);
+
+    if (!result.isEmpty()) {
+        let errors = [];
+        result.array().forEach(error => {
+            errors.push(error.msg);
+        });
+        return res.status(422).json({ message: errors });
+    }
+
+    const { email } = req.body;
+
+    try {
+        const user = await prisma.user.findUnique({
+            where: {
+                email
+            }
+        });
+
+        if (!user) {
+            return res.status(404).json({ message: 'User does not exist' });
+        }
+
+        const token = crypto.randomBytes(32).toString('hex');
+
+        const resetLink = process.env.SELF_URL + 'reset-password-form/' + token;
+
+        const emailSent = await sendEmail(email, 'Reset your password', `Please click on the following link to reset your password: <a href="${resetLink}">${resetLink}</a>`);
+
+        if (!emailSent) {
+            return res.status(500).json({ message: 'Something went wrong, please try again later or try contact assitance service ' });
+        }
+
+        const tokenIndex = email
+        verificationTokens.push({ tokenIndex, token });
+        return res.status(200).json({ message: 'Email sent successfully' });
+
+    }
+    catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: 'Something went wrong, please try again later or try contact assitance service ' });
+    }
+}
+
+
+const resetPassword = async (req, res) => {
+
+    const { token, password } = req.body;
+
+    const tokenIndex = verificationTokens.findIndex(t => t.token === token);
+
+    if (tokenIndex === -1) {
+
+        return res.status(404).json({ message: 'Url not found' });
+
+    } else {
+
+        const email = verificationTokens[tokenIndex].email;
+
+        const hashedPassword = await bcrypt.hash(password, parseInt(process.env.SALT_ROUNDS));
+
+        try {
+            await prisma.Credential.update({
+                where: {
+                    email
+                },
+                data: {
+                    password: hashedPassword
+                }
+            });
+
+            verificationTokens.splice(tokenIndex, 1);
+
+            return res.status(200).json({ message: 'Password reset successfully' });
+        } catch (error) {
+            console.log(error);
+            return res.status(500).json({ message: 'Something went wrong, please try again later or try contact assitance service ' });
+        }
+    }
+}
+
 module.exports = {
     register,
     login,
     verifyPhone,
     sendVerifyEmail,
-    verifyEmail
+    verifyEmail,
+    forgotPassword,
+    resetPassword
 }
