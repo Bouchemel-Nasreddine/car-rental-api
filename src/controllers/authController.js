@@ -8,6 +8,7 @@ const { validationResult } = require('express-validator');
 const axios = require('axios');
 const sgMail = require('@sendgrid/mail');
 const crypto = require('crypto');
+const path = require('path');
 
 const prisma = new PrismaClient();
 
@@ -417,6 +418,8 @@ const forgotPassword = async (req, res) => {
         return res.status(422).json({ message: errors });
     }
 
+
+
     const { email } = req.body;
 
     try {
@@ -453,6 +456,9 @@ const forgotPassword = async (req, res) => {
 
 
 const resetPassword = async (req, res) => {
+
+
+    console.log("req.body: ", req.body);
 
     const { token, password } = req.body;
 
