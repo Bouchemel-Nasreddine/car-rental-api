@@ -79,3 +79,73 @@ model Admin {
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
 }
+
+enum GearType {
+  MANUAL
+  AUTOMATIC
+}
+
+enum FuelType {
+  GASOLINE
+  DIESEL
+  ELECTRIC
+  HYBRID
+}
+
+enum BreakType {
+  DISC
+  DRUM
+  HYDRAULIC
+  ANTILOCK
+  MECHANICAL
+  REGENERATIVE
+}
+
+enum CarType {
+  SEDAN
+  HATCHBACK
+  SUV
+  COUPE
+  CONVERTIBLE
+  WAGON
+  VAN
+  MINIVAN
+  JEEP
+  OTHER
+}
+
+model Car {
+  id                 Int       @id @default(autoincrement())
+  brand              String
+  model              String
+  year               Int
+  color              String
+  carType            CarType
+  fuelType           FuelType
+  fuelCapacity       Float
+  fuelEfficiency     Int
+  gearType           GearType
+  breakType          BreakType
+  remark             String?   @default("")
+  rentPrice          Float
+  location           String
+  latitude           Float
+  longitude          Float
+  seats              Int
+  doors              Int
+  airCondition       Boolean
+  bluetooth          Boolean
+  usb                Boolean
+  gps                Boolean
+  radio              Boolean
+  aux                Boolean
+  childSeat          Boolean
+  registrationNumber String
+  image              String
+  images             String[]
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  deletedAt          DateTime?
+
+  @@unique([registrationNumber], name: "Car_registrationNumber_unique")
+}
