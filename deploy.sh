@@ -2,7 +2,7 @@ echo "=============Kill all the running PM2 actions============="
 sudo pm2 kill
 
 echo "=============Jump to app folder==========================="
-cd /srv/car-rental-api
+cd ~/apps/car-rental-api
 pwd
 
 echo "=============Update app from Git=========================="
