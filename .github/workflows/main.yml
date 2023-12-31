@@ -18,5 +18,6 @@ jobs:
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
+            export PATH="$PATH:/home/ubuntu/.nvm/versions/node/v16.15.1/bin"
             cd /home/ubuntu/apps/car-rental-api
             sh deploy.sh
