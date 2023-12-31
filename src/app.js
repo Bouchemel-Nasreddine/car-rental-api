@@ -27,7 +27,7 @@ app.use((req, res, next) => {
 
 
 app.get('/', async (req, res) => {
-    res.json({ message: 'Hello: this is the root of the Car Rental API :)' });
+    res.json({ message: 'Hello! this is the root of the Car Rental API :)' });
 });
 
 app.use('/', authRoutes);
