@@ -10,9 +10,11 @@ const carRoutes = require('./routes/car');
 
 app.use(express.json());
 
-app.use('/uploads/images', express.static(path.join('uploads', 'images')));
+//app.use('/uploads/images', express.static(path.join(process.env.UPLOADED_FILES_PATH)));
 
-app.use('/uploads/files', express.static(path.join('uploads', 'files')));
+app.use('/uploads/images', express.static(path.join(process.env.UPLOADED_IMAGES_PATH)));
+
+app.use('/uploads/files', express.static(path.join(process.env.UPLOADED_FILES_PATH)));
 
 app.set('views', path.join(__dirname, 'views'));
 
@@ -44,4 +46,5 @@ app.use((req, res, next) => {
 
 app.listen(process.env.PORT || 3000, () => {
     console.log('Server is running on port 3000');
+    console.log(__dirname);
 });
