@@ -115,7 +115,8 @@ const register = async (req, res) => {
         license = await prisma.document.create({
             data: {
                 type: 'license',
-                file: process.env.SELF_URL + licenseFile.path.replace('\\', '/').replace('\\', '/'),
+                //file: process.env.SELF_URL + licenseFile.path.replace('\\', '/').replace('\\', '/'),
+                file: process.env.SELF_URL + 'uploads/files/' + licenseFile.filename,
                 number: license_number,
                 deliveredAt: license_delivery_date,
                 validUntil: license_expiration_date
@@ -131,7 +132,8 @@ const register = async (req, res) => {
     let avatar;
     const avatarFile = req.files.find(file => file.fieldname === 'avatar');
     if (avatarFile) {
-        avatar = process.env.SELF_URL + avatarFile.path.replace('\\', '/').replace('\\', '/');
+        //avatar = process.env.SELF_URL + avatarFile.path.replace('\\', '/').replace('\\', '/');
+        avatar = process.env.SELF_URL + 'uploads/images/' + avatarFile.filename;
     } else {
         avatar = null;
     }
