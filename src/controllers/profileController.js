@@ -47,7 +47,8 @@ const getProfileController = async (req, res) => {
                 type: license.type,
                 number: license.number,
                 expirationDate: license.validUntil.toISOString().split('T')[0],
-                deliveryDate: license.deliveredAt.toISOString().split('T')[0]
+                deliveryDate: license.deliveredAt.toISOString().split('T')[0],
+                file: license.file,
             },
             avatar: user.avatar,
             profileVerified: user.profileVerified,
